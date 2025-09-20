@@ -5,61 +5,66 @@ from datetime import datetime, date, time
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, Date, Time, ForeignKey, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # --- DB Setup ---
-DATABASE_URL = "sqlite:///./school.db"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(DATABASE_URL)
 Base = declarative_base()
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 # --- Models ---
 class Student(Base):
     __tablename__ = "students"
-    student_id = Column(String, primary_key=True)
-    name = Column(String)
-    interests = Column(String, nullable=True)
+    student_id = Column(String(50), primary_key=True)
+    name = Column(String(100))
+    interests = Column(String(500), nullable=True)
     attendance_percent = Column(Integer, default=0)
 
 class Teacher(Base):
     __tablename__ = "teachers"
-    teacher_id = Column(String, primary_key=True)
-    name = Column(String)
-    subject = Column(String)
+    teacher_id = Column(String(50), primary_key=True)
+    name = Column(String(100))
+    subject = Column(String(100))
 
 class Class(Base):
     __tablename__ = "classes"
     class_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    subject = Column(String)
-    teacher_id = Column(String, ForeignKey("teachers.teacher_id"))
+    subject = Column(String(100))
+    teacher_id = Column(String(50), ForeignKey("teachers.teacher_id"))
     date = Column(Date)
     start_time = Column(Time)
     end_time = Column(Time)
-    qr_code = Column(String)
-    status = Column(String, default="ongoing")  # ongoing, completed, free
+    qr_code = Column(String(100))
+    status = Column(String(20), default="ongoing")  # ongoing, completed, free
 
 class Attendance(Base):
     __tablename__ = "attendance"
     attendance_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     class_id = Column(Integer, ForeignKey("classes.class_id"))
-    student_id = Column(String, ForeignKey("students.student_id"))
+    student_id = Column(String(50), ForeignKey("students.student_id"))
     present = Column(Boolean, default=False)
     teacher_present = Column(Boolean, default=False)
 
 class Timetable(Base):
     __tablename__ = "timetable"
     timetable_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    day_of_week = Column(String)  # Mon, Tue...
-    subject = Column(String)
-    teacher_id = Column(String, ForeignKey("teachers.teacher_id"))
+    day_of_week = Column(String(10))  # Mon, Tue...
+    subject = Column(String(100))
+    teacher_id = Column(String(50), ForeignKey("teachers.teacher_id"))
     start_time = Column(Time)
     end_time = Column(Time)
 
 class Score(Base):
     __tablename__ = "scores"
     score_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    student_id = Column(String, ForeignKey("students.student_id"))
-    subject = Column(String)
+    student_id = Column(String(50), ForeignKey("students.student_id"))
+    subject = Column(String(100))
     marks = Column(Integer)
 
 Base.metadata.create_all(bind=engine)
