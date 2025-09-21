@@ -1,7 +1,8 @@
 # Environment variables
-.env
-.env.*
+# .env
+# .env.*
 
+firebase-service-account.json
 # Python
 __pycache__/
 *.py[cod]
